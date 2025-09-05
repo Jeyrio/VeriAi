@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  veriai-backend:
+    build: .
+    container_name: veriai-backend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - MONGODB_URI=${MONGODB_URI}
+      - PRIVATE_KEY=${PRIVATE_KEY}
+      - VERI_AI_CONTRACT_ADDRESS=${VERI_AI_CONTRACT_ADDRESS}
+      - VERI_AI_NFT_CONTRACT_ADDRESS=${VERI_AI_NFT_CONTRACT_ADDRESS}
+      - FDC_RELAYER_CONTRACT_ADDRESS=${FDC_RELAYER_CONTRACT_ADDRESS}
+      - NETWORK_URL=${NETWORK_URL}
+      - NETWORK_CHAIN_ID=${NETWORK_CHAIN_ID}
+      - TREASURY_ADDRESS=${TREASURY_ADDRESS}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - CORS_ORIGIN=${CORS_ORIGIN}
+      - FDC_API_URL=${FDC_API_URL}
+      - FDC_API_KEY=${FDC_API_KEY}
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - veriai-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Local MongoDB for development
+  # mongodb:
+  #   image: mongo:6.0
+  #   container_name: veriai-mongodb
+  #   restart: unless-stopped
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: veriai
+  #     MONGO_INITDB_ROOT_PASSWORD: veriai
+  #     MONGO_INITDB_DATABASE: veriai
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - mongodb_data:/data/db
+  #   networks:
+  #     - veriai-network
+
+  # Optional: Redis for caching
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: veriai-redis
+  #   restart: unless-stopped
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - veriai-network
+
+networks:
+  veriai-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local
